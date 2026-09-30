@@ -1,0 +1,27 @@
+services:
+  api:
+    build: ./backend
+    ports: ["8000:8000"]
+    environment:
+      DATABASE_URL: sqlite:///./data/crop_health.db
+      SECRET_KEY: change-this-for-a-real-deployment
+      CORS_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
+      DEMO_MODE: "true"
+    volumes:
+      - crop-data:/app/data
+      - crop-uploads:/app/uploads
+  web:
+    image: node:20-alpine
+    working_dir: /web
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    ports: ["5173:5173"]
+    environment:
+      VITE_API_URL: http://localhost:8000/api
+    volumes:
+      - ./frontend:/web
+      - web-modules:/web/node_modules
+    depends_on: [api]
+volumes:
+  crop-data:
+  crop-uploads:
+  web-modules:
